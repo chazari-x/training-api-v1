@@ -20,12 +20,12 @@ import (
 
 // API is the handler for the API
 type API struct {
-	log *logrus.Logger
-	s   *storage.Storage
+	log     *logrus.Logger
+	Storage *storage.Storage
 }
 
 // NewApi creates a new API
-func NewApi(logger *logrus.Logger, storage *storage.Storage) *API {
+func NewApi(logger *logrus.Logger, Host string, Port string, User string, Pass string, Name string) (*API, error) {
 	if logger == nil {
 		logger = logrus.New()
 		logger.SetLevel(logrus.TraceLevel)
@@ -40,7 +40,9 @@ func NewApi(logger *logrus.Logger, storage *storage.Storage) *API {
 		})
 	}
 
-	return &API{logger, storage}
+	str, err := storage.NewStorage(context.Background(), Host, Port, User, Pass, Name)
+
+	return &API{logger, str}, err
 }
 
 // Router returns the router for the API
@@ -138,7 +140,7 @@ func (c *API) v2user(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if u, err := c.s.SelectById(user.Data.ID); err == nil {
+		if u, err := c.Storage.SelectById(user.Data.ID); err == nil {
 			var longUser = model.LongUser{
 				ID:                      user.Data.ID,
 				Login:                   user.Data.Login,
@@ -223,7 +225,7 @@ func (c *API) v2user(w http.ResponseWriter, r *http.Request) {
 			orderBy = "account_id"
 		}
 
-		users, err := c.s.SearchByPageAndLimit(r.URL.Query().Get("search"), limitInt, 0+(pageInt-1)*limitInt, orderBy)
+		users, err := c.Storage.SearchByPageAndLimit(r.URL.Query().Get("search"), limitInt, 0+(pageInt-1)*limitInt, orderBy)
 		if err != nil {
 			if errors.Is(err, pg.ErrNoRows) {
 				w.WriteHeader(http.StatusNotFound)
