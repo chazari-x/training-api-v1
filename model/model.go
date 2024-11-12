@@ -58,6 +58,11 @@ type Warn struct {
 	BanTime string `json:"bantime"`
 }
 
+type ShortUser struct {
+	ID    int    `json:"id"`
+	Login string `json:"login"`
+}
+
 type LongUser struct {
 	ID                      int      `json:"id"`
 	Login                   string   `json:"login"`

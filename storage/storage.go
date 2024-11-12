@@ -61,17 +61,17 @@ func (s *Storage) SelectById(id int) (model.User, error) {
 	return user, err
 }
 
-func (s *Storage) SearchByPageAndLimit(search string, limit, offset int, orderBy string) ([]model.LongUser, error) {
+func (s *Storage) SearchByPageAndLimit(search string, limit, offset int, orderBy string) ([]model.ShortUser, error) {
 	var users []model.User
 	err := s.db.Model(&users).Where("account_name ILIKE ? OR account_id::text ILIKE ?", "%"+search+"%", "%"+search+"%").Limit(limit).Offset(offset).Order(orderBy).Select()
 	if err != nil {
 		return nil, err
 	}
 
-	var longUsers []model.LongUser
+	var shortUsers []model.ShortUser
 	for _, user := range users {
-		longUsers = append(longUsers, model.LongUser{ID: user.AccountID, Login: user.AccountName})
+		shortUsers = append(shortUsers, model.ShortUser{ID: user.AccountID, Login: user.AccountName})
 	}
 
-	return longUsers, nil
+	return shortUsers, nil
 }
